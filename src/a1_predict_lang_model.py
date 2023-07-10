@@ -266,7 +266,6 @@ def plot_confusion_matrix(cm, labels, filepath):
     fig.write_html(filepath)
 
 
-
 def main():
     conf = nu.load_config("a1") # Load config
     train_data, valid_data = load_datasets(conf.paths.normalized_txt, conf.paths.raw_txt, conf.langs) # load data
@@ -290,15 +289,7 @@ def main():
     # Calculate confusion matrix
     cm = get_confusion_matrix(actual_texts, predicted_texts, list(models.keys()))
     plot_confusion_matrix(cm, list(models.keys()), f'{conf.paths.reporting_plots}confusion_matrix.html') # Plot confusion matrix
-    logger.info(f'Accuracy: {accuracy}')
-
-
-    # # Calculate perplexity
-    # perplexity = {}
-    # for lang in conf.langs:
-    #     perplexity[lang] = {}
-    #     for model_lang in conf.langs:
-    #         perplexity[lang][model_lang] = calculate_perplexity(models[model_lang], validation_data[lang])
+    logger.info(f'Perplexity based Accuracy: {accuracy}')
 
 
 if __name__ == '__main__':

@@ -2,7 +2,11 @@ import os
 import log
 import time
 import functools
+import json
+from collections import defaultdict, Counter
 from datetime import datetime
+from ast import literal_eval
+from typing import List, Tuple, Dict, Union
 
 from pyhocon import ConfigFactory
 
@@ -61,16 +65,16 @@ def load_text_data(file_path: str) -> str:
     return data
 
 
-def write_text_data(file_path: str, data: str):
+def write_text_data(file_path: str, sentences: str):
     """
     Function to write text data to a file.
 
     Args:
     file_path (str): Path to the text file.
-    data (str): Text data to be written to the file.
+    sentences (str): Corpus.
     """
     with open(file_path, 'w') as file:
-        file.write(data)
+        file.write(sentences)
 
 
 def _get_current_dt() -> str:
@@ -94,3 +98,43 @@ def save_plot(plot_filepath, fig, filename):
     # save figure to file
     fig.write_image(filepath)
     logger.info(f"Plot saved: {prefix}")
+
+
+def save_model(model: Dict[Tuple[str, str], Counter], file_path: str) -> None:
+    """
+    Function to save the language model to a JSON file.
+
+    Args:
+    model (Dict[Tuple[str, str], Counter]): Language model.
+    file_path (str): Path to the JSON file where the model will be saved.
+    """
+    # Convert the defaultdict and Counter objects to regular dictionaries
+    model_dict = {k: dict(v) for k, v in model.items()}
+
+    # Convert the tuples to strings (JSON keys need to be strings)
+    model_dict = {str(k): v for k, v in model_dict.items()}
+
+    with open(file_path, 'w') as file:
+        json.dump(model_dict, file, ensure_ascii=False)
+
+
+def load_model(file_path: str) -> Dict[Tuple[str, str], Counter]:
+    """
+    Function to load the language model from a JSON file.
+
+    Args:
+    file_path (str): Path to the JSON file where the model is saved.
+
+    Returns:
+    Dict[Tuple[str, str], Counter]: Language model.
+    """
+    with open(file_path, 'r') as file:
+        model_dict = json.load(file)
+
+    # Convert the strings back to tuples and the dictionaries back to Counters
+    model = {literal_eval(k): Counter(v) for k, v in model_dict.items()}
+
+    # Convert the dictionary back to a defaultdict
+    model = defaultdict(Counter, model)
+
+    return model

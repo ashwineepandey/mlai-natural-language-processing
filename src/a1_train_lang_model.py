@@ -104,6 +104,57 @@ def plot_perplexity(df: pd.DataFrame):
     # Show plot
     fig.show()
 
+
+def extract_model_excerpt(model: Dict[Tuple[str, str], Counter], history: Tuple[str, str]) -> Dict[str, float]:
+    """
+    Function to extract an excerpt of a language model.
+
+    Args:
+    model (Dict[Tuple[str, str], Counter]): The language model.
+    history (Tuple[str, str]): The two-character history to extract N-grams for.
+
+    Returns:
+    Dict[str, float]: Dictionary of N-grams and their probabilities.
+    """
+    ngrams = model[history]
+    total_count = sum(ngrams.values())
+    return {ngram: count / total_count for ngram, count in ngrams.items()}
+
+
+
+def get_stats(vocab):
+    pairs = defaultdict(int)
+    for word, freq in vocab.items():
+        symbols = word.split()
+        for i in range(len(symbols)-1):
+            pairs[symbols[i],symbols[i+1]] += freq
+    return pairs
+
+def merge_vocab(pair, v_in):
+    v_out = {}
+    bigram = re.escape(' '.join(pair))
+    p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
+    for word in v_in:
+        w_out = p.sub(''.join(pair), word)
+        v_out[w_out] = v_in[word]
+    return v_out
+
+def get_vocab(text):
+    words = text.split()
+    vocab = Counter(words)
+    return {' '.join(word): freq for word, freq in vocab.items()}
+
+def byte_pair_encoding(text, num_iterations):
+    vocab = get_vocab(text)
+    for i in range(num_iterations):
+        pairs = get_stats(vocab)
+        if not pairs:
+            break
+        best = max(pairs, key=pairs.get)
+        vocab = merge_vocab(best, vocab)
+    return vocab
+
+
 @nu.timer
 def main():
     conf = nu.load_config("a1") # Load config
@@ -111,6 +162,11 @@ def main():
         norm_train = nu.load_text_data(f"{conf.paths.normalized_txt}norm_train.{lang}.txt") # load data
         trigrams = generate_trigrams(norm_train) # Generate trigrams        
         model = build_language_model(trigrams) # Build language model
+        if lang == 'en':
+            print(f"Sample excerpt of the {lang} language model:")
+            eng_excerpt = extract_model_excerpt(model, ('t', 'h'))
+            print(eng_excerpt)
+
         nu.save_model(model, f"{conf.paths.models}model_{lang}.json") # save model
 
 
