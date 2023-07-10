@@ -156,12 +156,13 @@ def main():
     for lang in conf.langs:
         bpe_vocab = byte_pair_encoding(train_data[lang], 100)
         bpe_vocabs[lang] = bpe_vocab
-        logger.info(f'{lang} | BPE vocab size: {len(bpe_vocab)}')
-        logger.info(f'{lang} | BPE vocab: {bpe_vocab}')
-
         # Report chars merged in first 10 iters
         merged_chars = get_merged_chars(bpe_vocab, 10)
         logger.info(f'{lang} | Merged characters in the first 10 iters: {merged_chars}')
+        if lang == 'en':
+            logger.info(f'{lang} | BPE vocab size: {len(bpe_vocab)}')
+            # logger.info(f'{lang} | BPE vocab: {bpe_vocab}')
+            
 
     # Report overlap of BPE subword vocab between langs
     vocab_overlap = get_vocab_overlap(bpe_vocabs)

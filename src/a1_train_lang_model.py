@@ -120,41 +120,6 @@ def extract_model_excerpt(model: Dict[Tuple[str, str], Counter], history: Tuple[
     total_count = sum(ngrams.values())
     return {ngram: count / total_count for ngram, count in ngrams.items()}
 
-
-
-def get_stats(vocab):
-    pairs = defaultdict(int)
-    for word, freq in vocab.items():
-        symbols = word.split()
-        for i in range(len(symbols)-1):
-            pairs[symbols[i],symbols[i+1]] += freq
-    return pairs
-
-def merge_vocab(pair, v_in):
-    v_out = {}
-    bigram = re.escape(' '.join(pair))
-    p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
-    for word in v_in:
-        w_out = p.sub(''.join(pair), word)
-        v_out[w_out] = v_in[word]
-    return v_out
-
-def get_vocab(text):
-    words = text.split()
-    vocab = Counter(words)
-    return {' '.join(word): freq for word, freq in vocab.items()}
-
-def byte_pair_encoding(text, num_iterations):
-    vocab = get_vocab(text)
-    for i in range(num_iterations):
-        pairs = get_stats(vocab)
-        if not pairs:
-            break
-        best = max(pairs, key=pairs.get)
-        vocab = merge_vocab(best, vocab)
-    return vocab
-
-
 @nu.timer
 def main():
     conf = nu.load_config("a1") # Load config

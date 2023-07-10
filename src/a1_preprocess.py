@@ -151,7 +151,7 @@ def normalize_text(text: str) -> str:
             normalized_sentences.append(sentence)
 
     # Convert the list of sentences into a single string with a newline between each sentence
-    data = '\n'.join(normalized_sentences)
+    data = '</s>'.join(normalized_sentences)
     return data
 
 
