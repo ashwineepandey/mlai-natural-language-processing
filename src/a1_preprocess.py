@@ -3,6 +3,7 @@ import string
 import numpy as np
 import pandas as pd
 import nltk
+# nltk.download('punkt')
 from nltk.util import ngrams
 from nltk.tokenize import sent_tokenize
 import plotly.express as px
@@ -80,7 +81,51 @@ def plot_zipfs_law(data: str, plot_filepath, title="Zipf's Law") -> None:
         )
     nu.save_plot(plot_filepath, fig, title)
 
+
+def basic_sentence_tokenizer(text: str) -> List[str]:
+    """
+    Function to split text into sentences based on periods, question marks,
+    and exclamation marks.
+
+    Args:
+    text (str): Text to split into sentences.
+
+    Returns:
+    List[str]: List of sentences.
+    """
+    sentences = re.split(r'[.!?]', text)
+    sentences = [sentence.strip() for sentence in sentences if sentence]
+    return sentences
+
+
 @nu.timer
+# def normalize_text(text: str) -> str:
+#     """
+#     Function to normalize the text data.
+
+#     Args:
+#     text (str): Text data.
+
+#     Returns:
+#     str: Normalized text data.
+#     """
+#     text = text.lower() # Lowercase the text
+#     text = re.sub(r'\d+', '0', text) # Substitute digits with 0
+#     text = text.translate(str.maketrans('', '', string.punctuation)) # Remove punctuation
+#     text = unidecode(text) # Remove diacritics
+#     # sentences = sent_tokenize(text) # Tokenize into sentences
+#     sentences = basic_sentence_tokenizer(text)
+#     normalized_sentences = []
+#     for sentence in sentences:
+#         # sentence = re.sub(r"[^\w\s]", '', sentence) # Remove punctuation
+#         sentence = sentence.strip() # Remove extra spaces
+#         if sentence:
+#             normalized_sentences.append(sentence)
+#     # Convert the list of sentences into a single string with a newline between each sentence
+#     data = '\n'.join(sentences) 
+#     return data
+
+
 def normalize_text(text: str) -> str:
     """
     Function to normalize the text data.
@@ -91,28 +136,33 @@ def normalize_text(text: str) -> str:
     Returns:
     str: Normalized text data.
     """
-    text = text.lower() # Lowercase the text
-    text = re.sub(r'\d', '0', text) # Remove digits
-    text = text.translate(str.maketrans('', '', string.punctuation)) # Remove punctuation
-    sentences = sent_tokenize(text) # Tokenize into sentences
+    # Tokenize into sentences
+    sentences = basic_sentence_tokenizer(text)
     normalized_sentences = []
+    
     for sentence in sentences:
-        sentence = re.sub(r"[^\w\s]", '', sentence) # Remove punctuation
-        normalized_sentences.append(sentence)
-    # Remove extra spaces
-    normalized_sentences = normalized_sentences.strip()
-    return normalized_sentences
+        sentence = sentence.lower() # Lowercase the sentence
+        sentence = re.sub(r'\d+', '0', sentence) # Substitute digits with 0 in the sentence
+        sentence = sentence.translate(str.maketrans('', '', string.punctuation)) # Remove punctuation from the sentence
+        sentence = unidecode(sentence) # Remove diacritics from the sentence
+        sentence = re.sub(r"[^\w\s]", '', sentence) # Remove punctuation from the sentence
+        sentence = sentence.strip() # Remove extra spaces from the sentence
+        if sentence:  # Add non-empty sentences
+            normalized_sentences.append(sentence)
+
+    # Convert the list of sentences into a single string with a newline between each sentence
+    data = '\n'.join(normalized_sentences)
+    return data
 
 
 def main():
     conf = nu.load_config("a1")
-
     for lang in conf.langs:
         logger.info(f"Loading {lang} data.")
         train_data = nu.load_text_data(f"{conf.paths.raw_txt}train.{lang}.txt")
         initial_eda(data=train_data)
         norm_train = normalize_text(train_data)
-        nu.write_text_data(f"{conf.paths.normalized_txt}norm_train_{lang}.txt", norm_train)
+        nu.write_text_data(f"{conf.paths.normalized_txt}norm_train.{lang}.txt", norm_train)
 
         plot_character_frequency(norm_train, f"{conf.paths.reporting_plots}", title=f"Character Frequency for {lang}")
         plot_word_length(norm_train, f"{conf.paths.reporting_plots}", title=f"Word Length Distribution for {lang}")
