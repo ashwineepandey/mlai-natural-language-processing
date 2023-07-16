@@ -3,6 +3,7 @@ import log
 import time
 import functools
 import json
+import pickle
 from collections import defaultdict, Counter
 from datetime import datetime
 from ast import literal_eval
@@ -136,5 +137,14 @@ def load_model(file_path: str) -> Dict[Tuple[str, str], Counter]:
 
     # Convert the dictionary back to a defaultdict
     model = defaultdict(Counter, model)
-
     return model
+
+
+def save_pickle(filepath: str, obj_name: str, obj):
+    with open(f'{filepath}{obj_name}.pkl', 'wb') as f:
+        pickle.dump(obj, f)
+
+
+def load_pickle(filepath: str, obj_name: str):
+    with open(f'{filepath}{obj_name}.pkl', 'rb') as f:
+        return pickle.load(f)

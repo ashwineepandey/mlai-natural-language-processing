@@ -1,7 +1,11 @@
 # mlai-natural-language-processing
 
+## Table of Contents
 
-## Language modelling and byte-pair Encoding
+1. [A1: Language modelling and byte-pair Encoding](#assignment1)
+2. [A2: Test](#assignment2)
+
+## Language modelling and byte-pair Encoding <a name="assignment1"></a>
 
 This project aims to create language models for multiple languages including Afrikaans, English, Dutch, Xhosa and Zulu. The project is divided into various steps from data exploration, preprocessing, training the model, to generating text and predicting language models.
 
@@ -85,3 +89,5 @@ The outputs of each step of the project are stored in the corresponding `data` s
 - `08_reporting`: Contains the various plots generated during the project, including character frequency, perplexity, word length distribution, and Zipf's law plots.
 
 In case of errors or other events, check the `logs` subdirectory.
+
+## Test <a name="assignment2"></a>

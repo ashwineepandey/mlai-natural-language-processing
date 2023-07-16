@@ -130,6 +130,8 @@ dmypy.json
 
 # Directories
 submissions/
+module_content/
+data/01_raw/
 
 # MacOS
 .DS_Store
@@ -165,3 +167,6 @@ submissions/
 *.html
 *.ppm
 *.mkv
+*.doc
+*.xls
+*.lara2
