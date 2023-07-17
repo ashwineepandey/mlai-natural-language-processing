@@ -3,7 +3,7 @@
 ## Table of Contents
 
 1. [A1: Language modelling and byte-pair Encoding](#assignment1)
-2. [A2: Test](#assignment2)
+2. [A2: IsiZulu Part-of-Speech Tagger using Hidden Markov Models](#assignment2)
 
 ## Language modelling and byte-pair Encoding <a name="assignment1"></a>
 
