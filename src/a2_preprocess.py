@@ -35,7 +35,7 @@ def remove_punctuation(data: pd.DataFrame):
     return data[data['POS'] != 'PUNCT']
 
 
-def split_into_sentences(df: pd.DataFrame, start_token: List[str, str], stop_token: List[str, str]) -> List[pd.DataFrame]:
+def split_into_sentences(df: pd.DataFrame, start_token: List[str], stop_token: List[str]) -> List[pd.DataFrame]:
     """
     Splits a DataFrame into a list of DataFrames each representing a sentence.
     Adds start and stop tokens to each sentence.
@@ -56,7 +56,7 @@ def split_into_sentences(df: pd.DataFrame, start_token: List[str, str], stop_tok
     return sentences
 
 
-def create_validation_set(sentences: List[pd.DataFrame], valid_size: float = 0.2) -> Tuple[List[pd.DataFrame], List[pd.DataFrame]]:
+def create_validation_set(sentences: List[pd.DataFrame], valid_size: float, seed: int) -> Tuple[List[pd.DataFrame], List[pd.DataFrame]]:
     """
     Creates a validation set from a list of DataFrames each representing a sentence.
 
@@ -67,7 +67,7 @@ def create_validation_set(sentences: List[pd.DataFrame], valid_size: float = 0.2
     Returns:
     Tuple[List[pd.DataFrame], List[pd.DataFrame]]: Training and validation sets.
     """
-    train_sentences, valid_sentences = train_test_split(sentences, test_size=valid_size, random_state=1)
+    train_sentences, valid_sentences = train_test_split(sentences, test_size=valid_size, random_state=seed)
     return train_sentences, valid_sentences
 
 
@@ -78,7 +78,7 @@ def main():
     df_test = remove_punctuation(df_test)
     sentences_train = split_into_sentences(df_train, conf.preprocess.start_token, conf.preprocess.stop_token)
     sentences_test = split_into_sentences(df_test, conf.preprocess.start_token, conf.preprocess.stop_token)
-    sentences_train, sentences_valid = create_validation_set(sentences_train)
+    sentences_train, sentences_valid = create_validation_set(sentences_train, conf.preprocess.valid_size, conf.preprocess.seed)
     nu.save_pickle(conf.paths.processed_txt, "sentences_test", sentences_test)
     nu.save_pickle(conf.paths.processed_txt, "sentences_train", sentences_train)
     nu.save_pickle(conf.paths.processed_txt, "sentences_valid", sentences_valid)

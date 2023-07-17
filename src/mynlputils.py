@@ -141,10 +141,31 @@ def load_model(file_path: str) -> Dict[Tuple[str, str], Counter]:
 
 
 def save_pickle(filepath: str, obj_name: str, obj):
+    """
+    Saves an object to a pickle file.
+
+    Args:
+    filepath: path to the pickle file
+    obj_name: name of the object to be saved
+    obj: the object to be saved
+    """
     with open(f'{filepath}{obj_name}.pkl', 'wb') as f:
         pickle.dump(obj, f)
+        logger.info(f"Object {obj_name} saved to pickle file.")
 
 
 def load_pickle(filepath: str, obj_name: str):
+    """
+    Loads a pickle file.
+
+    Args:
+    filepath: path to the pickle file
+    obj_name: name of the object to be loaded
+
+    Returns:
+    obj: the loaded object
+    """
     with open(f'{filepath}{obj_name}.pkl', 'rb') as f:
-        return pickle.load(f)
+        obj = pickle.load(f)
+        logger.info(f"Object {obj_name} loaded from pickle file.")
+        return obj
