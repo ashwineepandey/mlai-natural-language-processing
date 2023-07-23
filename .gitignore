@@ -149,6 +149,7 @@ data/01_raw/
 *.npz
 *.pkl
 *.h5
+*.pt
 
 # Data
 *.csv

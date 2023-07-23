@@ -27,7 +27,6 @@ def viterbi_algorithm(model: HMM, sentence: pd.DataFrame, unk_word_prob: float) 
 
     dp = np.zeros((n_states, n_tokens))
     ptr = np.zeros((n_states, n_tokens), dtype=int)
-    unk_word_prob = 1e-6  # Small constant probability for unknown words
 
     # # Initialization
     # for i, state in enumerate(states):

@@ -7,6 +7,7 @@ from collections import defaultdict, Counter
 from datetime import datetime
 from ast import literal_eval
 from typing import List, Tuple, Dict, Union
+import torch
 
 from pyhocon import ConfigFactory
 
@@ -138,3 +139,14 @@ def load_model(file_path: str) -> Dict[Tuple[str, str], Counter]:
     model = defaultdict(Counter, model)
 
     return model
+
+
+def save_pytorch_model(model, file_path: str) -> None:
+    """
+    Function to save a PyTorch model to a file.
+
+    Args:
+    model (torch.nn.Module): PyTorch model.
+    file_path (str): Path to the file where the model will be saved.
+    """
+    torch.save(model.state_dict(), file_path)
