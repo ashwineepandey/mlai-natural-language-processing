@@ -3,6 +3,7 @@ import log
 import time
 import functools
 import json
+import pickle
 from collections import defaultdict, Counter
 from datetime import datetime
 from ast import literal_eval
@@ -140,6 +141,36 @@ def load_model(file_path: str) -> Dict[Tuple[str, str], Counter]:
 
     return model
 
+def save_pickle(filepath: str, obj_name: str, obj):
+    """
+    Saves an object to a pickle file.
+
+    Args:
+    filepath: path to the pickle file
+    obj_name: name of the object to be saved
+    obj: the object to be saved
+    """
+    with open(f'{filepath}{obj_name}.pkl', 'wb') as f:
+        pickle.dump(obj, f)
+        logger.info(f"Object {obj_name} saved to pickle file.")
+
+
+def load_pickle(filepath: str, obj_name: str):
+    """
+    Loads a pickle file.
+
+    Args:
+    filepath: path to the pickle file
+    obj_name: name of the object to be loaded
+
+    Returns:
+    obj: the loaded object
+    """
+    with open(f'{filepath}{obj_name}.pkl', 'rb') as f:
+        obj = pickle.load(f)
+        logger.info(f"Object {obj_name} loaded from pickle file.")
+        return obj
+
 
 def save_pytorch_model(model, file_path: str) -> None:
     """
@@ -150,3 +181,18 @@ def save_pytorch_model(model, file_path: str) -> None:
     file_path (str): Path to the file where the model will be saved.
     """
     torch.save(model.state_dict(), file_path)
+
+
+def load_pytorch_model(model, file_path: str) -> torch.nn.Module:
+    """
+    Function to load a PyTorch model from a file.
+
+    Args:
+    model (torch.nn.Module): PyTorch model.
+    file_path (str): Path to the file where the model is saved.
+
+    Returns:
+    torch.nn.Module: PyTorch model.
+    """
+    model.load_state_dict(torch.load(file_path))
+    return model
