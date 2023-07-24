@@ -11,13 +11,13 @@ from typing import List, Tuple, Dict
 logger = log.get_logger(__name__)
 
 @nu.timer
-def create_batches(skipgrams: List[Tuple[List[int], int]], word2idx: Dict[str, int], pad_idx: int, batch_size: int, num_neg_samples: int) -> List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
+def create_batches(skipgrams: List[Tuple[List[int], int]], vocab_size: int, pad_idx: int, batch_size: int, num_neg_samples: int) -> List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
     """
     Creates batches of skip-gram pairs for model training.
 
     Parameters:
     skipgrams (List[Tuple[List[int], int]]): List of skipgram pairs.
-    word2idx (Dict[str, int]): Dictionary mapping words to their corresponding indices.
+    vocab_size int: Length of vocab.
     pad_idx (int): The index to use for padding.
     batch_size (int): The size of each batch.
     num_neg_samples (int): The number of negative samples to use.
@@ -25,8 +25,6 @@ def create_batches(skipgrams: List[Tuple[List[int], int]], word2idx: Dict[str, i
     Returns:
     List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]: List of batches.
     """
-    words_list = list(word2idx.keys())
-    vocab_size = len(words_list)
     n = len(skipgrams)
 
     # Shuffle skipgrams
@@ -139,7 +137,7 @@ def train(model: nn.Module, epochs: int, train_batches: List[Tuple[torch.Tensor,
         val_loss = evaluate(model, val_batches)
         val_losses.append(val_loss)
 
-        logger.info(f'Epoch {epoch}, Train Loss: {train_loss}, Validation Loss: {val_loss}')
+        logger.info(f'Epoch {epoch}, Train Loss: {train_losses[-1]}, Validation Loss: {val_losses[-1]}')
     return model, train_losses, val_losses
 
 
@@ -189,12 +187,9 @@ def main():
     skipgrams_valid = nu.load_pickle(conf.paths.skipgrams, "skipgrams_valid")
     vocab = nu.load_pickle(conf.paths.vocab, "vocab")
     word2idx = nu.load_pickle(conf.paths.vocab, "word2idx")
-
-    train_batches = create_batches(skipgrams_train, vocab, word2idx[conf.preprocess.pad_token], conf.model.batch_size, conf.model.num_neg_samples)
-    valid_batches = create_batches(skipgrams_valid, vocab, word2idx[conf.preprocess.pad_token], conf.model.batch_size, conf.model.num_neg_samples)
-
-    vocab_size = len(vocab)
-    model = CBOW_NS(vocab_size, conf.model.embed_size)
+    train_batches = create_batches(skipgrams_train, len(vocab), word2idx[conf.preprocess.pad_token], conf.model.batch_size, conf.model.num_neg_samples)
+    valid_batches = create_batches(skipgrams_valid, len(vocab), word2idx[conf.preprocess.pad_token], conf.model.batch_size, conf.model.num_neg_samples)
+    model = CBOW_NS(len(vocab), conf.model.embed_size)
     trained_model, train_losses, val_losses = train(model, conf.model.epochs, train_batches, valid_batches, conf.model.lr)
     nu.save_pytorch_model(trained_model, file_path=f"{conf.paths.models}cbow_ns_{nu._get_current_dt()}.pt")
     plot_losses(train_losses, val_losses, conf.model.epochs, conf.paths.reporting_plots, "training_loss")

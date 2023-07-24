@@ -1,5 +1,5 @@
 import mynlputils as nu
-from src.a3_train_embedding import CBOW_NS
+from a3_train_embedding import CBOW_NS
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
@@ -8,16 +8,17 @@ import pandas as pd
 import plotly.express as px
 from typing import List
 import log
+import glob
 
 logger = log.get_logger(__name__)
 
 @nu.timer
-def create_tsne_embeddings(embeddings: np.ndarray, n_components: int, vocab: List[str], filepath: str, obj_name: str):
-    # Create TSNE model
-    tsne = TSNE(n_components=n_components, random_state=42)
-    embeddings_2d = tsne.fit_transform(embeddings[:len(vocab), :])
-    nu.save_pickle(filepath, obj_name, embeddings_2d)
-    return embeddings_2d
+# def create_tsne_embeddings(embeddings: np.ndarray, n_components: int, vocab: List[str], filepath: str, obj_name: str):
+#     # Create TSNE model
+#     tsne = TSNE(n_components=n_components, random_state=42)
+#     embeddings_2d = tsne.fit_transform(embeddings[:len(vocab), :])
+#     nu.save_pickle(filepath, obj_name, embeddings_2d)
+#     return embeddings_2d
 
 @nu.timer
 def create_pca_embeddings(embeddings: np.ndarray, n_components: int, vocab: List[str], filepath: str, obj_name: str):
@@ -68,11 +69,12 @@ def main():
     word2idx = nu.load_pickle(conf.paths.vocab, "word2idx")
     idx2word = {v: k for k, v in word2idx.items()}
     model = CBOW_NS(len(vocab), conf.model.embed_size)
-    model = nu.load_pytorch_model(model, f"{conf.paths.model}")
+    model_files = glob.glob(f"{conf.paths.models}cbow_ns_*.pt")
+    model = nu.load_pytorch_model(model, f"{conf.paths.models}cbow_ns_*.pt")
     embeddings = model.embeddings.weight.detach().numpy()
-    embeddings_2d_tsne = create_tsne_embeddings(embeddings, 2, vocab_subset, conf.paths.embeddings, "embeddings_2d_tsne")
-    embeddings_2d_pca = create_pca_embeddings(embeddings, 2, vocab_subset, conf.paths.embeddings, "embeddings_2d_pca")
-    plot_embeddings(embeddings_2d_tsne, vocab_subset, conf.paths.reporting_plots, "word-embeddings-tsne", "TSNE")
+    # embeddings_2d_tsne = create_tsne_embeddings(embeddings, 2, vocab_subset, conf.paths.model_output, "embeddings_2d_tsne")
+    embeddings_2d_pca = create_pca_embeddings(embeddings, 2, vocab_subset, conf.paths.model_output, "embeddings_2d_pca")
+    # plot_embeddings(embeddings_2d_tsne, vocab_subset, conf.paths.reporting_plots, "word-embeddings-tsne", "TSNE")
     plot_embeddings(embeddings_2d_pca, vocab_subset, conf.paths.reporting_plots, "word-embeddings-pca", "PCA")
     process_word_list(vocab_subset, embeddings, word2idx, idx2word, conf.embedding_viz.num_closest_words, f"{conf.paths.model_output}closest_words.csv")
 

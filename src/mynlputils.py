@@ -182,3 +182,18 @@ def save_pytorch_model(model, file_path: str) -> None:
     file_path (str): Path to the file where the model will be saved.
     """
     torch.save(model.state_dict(), file_path)
+
+
+def load_pytorch_model(model, file_path: str) -> torch.nn.Module:
+    """
+    Function to load a PyTorch model from a file.
+
+    Args:
+    model (torch.nn.Module): PyTorch model.
+    file_path (str): Path to the file where the model is saved.
+
+    Returns:
+    torch.nn.Module: PyTorch model.
+    """
+    model.load_state_dict(torch.load(file_path))
+    return model

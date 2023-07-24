@@ -112,6 +112,7 @@ def create_skipgrams(corpus: List[List[int]], window_size: int, pad_idx: int) ->
         for word_index in range(window_size, len(padded_sentence) - window_size):
             contexts = padded_sentence[word_index - window_size : word_index] + padded_sentence[word_index + 1 : word_index + window_size + 1]
             data.append((contexts, padded_sentence[word_index]))
+    logger.info(f"Created {len(data)} skip-gram pairs.")
     return data
 
 
@@ -124,10 +125,14 @@ def main():
     df_test_clean = clean_text(df_test)
 
     train_tokens = split_docs(df_train_clean)
+    logger.info(f"Number of training documents: {len(train_tokens)}")
     valid_tokens = split_docs(df_valid_clean)
+    logger.info(f"Number of validation documents: {len(valid_tokens)}")
     test_tokens = split_docs(df_test_clean)
+    logger.info(f"Number of testing documents: {len(test_tokens)}")
 
     vocab, idx_train_tokens, word2idx = tokenize(train_tokens)
+    logger.info(f"Vocabulary size: {len(vocab)}")
     _, idx_valid_tokens, _ = tokenize(valid_tokens)
     _, idx_test_tokens, _ = tokenize(test_tokens)
 
@@ -135,12 +140,19 @@ def main():
     skipgrams_train = create_skipgrams(idx_train_tokens, window_size=conf.preprocess.window_size, pad_idx=pad_idx)
     skipgrams_valid = create_skipgrams(idx_valid_tokens, window_size=conf.preprocess.window_size, pad_idx=pad_idx)
     skipgrams_test = create_skipgrams(idx_test_tokens, window_size=conf.preprocess.window_size, pad_idx=pad_idx)
-    nu.save_pickle(conf.paths.skipgrams, "skipgrams_train", skipgrams_train)
-    nu.save_pickle(conf.paths.skipgrams, "skipgrams_valid", skipgrams_valid)
-    nu.save_pickle(conf.paths.skipgrams, "skipgrams_test", skipgrams_test)
-    nu.save_pickle(conf.paths.vocab, "vocab", vocab)
-    nu.save_pickle(conf.paths.vocab, "word2idx", word2idx)
-
+    
+    # nu.save_pickle(conf.paths.skipgrams, "skipgrams_train", skipgrams_train)
+    # nu.save_pickle(conf.paths.skipgrams, "skipgrams_valid", skipgrams_valid)
+    # nu.save_pickle(conf.paths.skipgrams, "skipgrams_test", skipgrams_test)
+    # nu.save_pickle(conf.paths.vocab, "vocab", vocab)
+    # nu.save_pickle(conf.paths.vocab, "word2idx", word2idx)
+    df_train_clean['class'] = df_train['label']
+    df_valid_clean['class'] = df_valid['label']
+    df_test_clean['class'] = df_test['label']
+    df_train_clean.to_csv(conf.paths.model_input, index=False)
+    df_valid_clean.to_csv(conf.paths.model_input, index=False)
+    df_test_clean.to_csv(conf.paths.model_input, index=False)
+    logger.info("Preprocessing complete.")
 
 if __name__ == "__main__":
     main()
